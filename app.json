@@ -1,12 +1,12 @@
 {
   "expo": {
-    "name": "Even-moble-app",
-    "slug": "Even-moble-app",
+    "name": "Even",
+    "slug": "even",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
-    "scheme": "evenmobleapp",
-    "userInterfaceStyle": "automatic",
+    "scheme": "even",
+    "userInterfaceStyle": "light",
     "ios": {
       "icon": "./assets/expo.icon"
     },
@@ -20,19 +20,13 @@
       "predictiveBackGestureEnabled": false
     },
     "web": {
+      "bundler": "metro",
       "output": "static",
       "favicon": "./assets/images/favicon.png"
     },
     "plugins": [
       "expo-router",
-      [
-        "expo-splash-screen",
-        {
-          "backgroundColor": "#208AEF",
-          "image": "./assets/images/splash-icon.png",
-          "imageWidth": 76
-        }
-      ]
+      "expo-font"
     ],
     "experiments": {
       "typedRoutes": true,
