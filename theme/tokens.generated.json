@@ -1,0 +1,148 @@
+{
+  "colors": {
+    "canvas": "#FAFBFC",
+    "surface": "#FFFFFF",
+    "surfaceSunken": "#F5F5F7",
+    "borderSubtle": "#EEEEF2",
+    "borderStrong": "#E4E4EA",
+    "textPrimary": "#1A1A1F",
+    "textSecondary": "#71717A",
+    "textMuted": "#AEAEB6",
+    "accent": "#4C82F7",
+    "accentHover": "#3B6FE0",
+    "accentWeak": "#EDF3FE",
+    "accentOn": "#FFFFFF",
+    "icon": "#52525B",
+    "iconMuted": "#AEAEB6",
+    "iconActive": "#4C82F7",
+    "iconOnAccent": "#FFFFFF"
+  },
+  "gradient": {
+    "rotation": 100,
+    "stops": [
+      {
+        "color": "#6CA4FF",
+        "position": 0
+      },
+      {
+        "color": "#A78BFA",
+        "position": 1
+      }
+    ]
+  },
+  "gradientStops": [
+    "#6CA4FF",
+    "#A78BFA"
+  ],
+  "spacing": {
+    "2": 2,
+    "4": 4,
+    "8": 8,
+    "12": 12,
+    "16": 16,
+    "20": 20,
+    "24": 24,
+    "32": 32,
+    "40": 40,
+    "48": 48
+  },
+  "radius": {
+    "sm": 12,
+    "md": 16,
+    "lg": 24,
+    "full": 999
+  },
+  "fontFamily": {
+    "display": "Fraunces",
+    "sans": "General Sans"
+  },
+  "fontWeight": {
+    "regular": "400",
+    "medium": "500",
+    "semibold": "600"
+  },
+  "fontAssets": [
+    {
+      "key": "Fraunces-400",
+      "family": "Fraunces",
+      "weight": "400",
+      "file": "Fraunces-Regular"
+    },
+    {
+      "key": "GeneralSans-500",
+      "family": "General Sans",
+      "weight": "500",
+      "file": "GeneralSans-Medium"
+    },
+    {
+      "key": "GeneralSans-400",
+      "family": "General Sans",
+      "weight": "400",
+      "file": "GeneralSans-Regular"
+    },
+    {
+      "key": "GeneralSans-600",
+      "family": "General Sans",
+      "weight": "600",
+      "file": "GeneralSans-Semibold"
+    }
+  ],
+  "typography": {
+    "displayLg": {
+      "fontFamily": "Fraunces",
+      "fontWeight": "400",
+      "fontSize": 32,
+      "lineHeight": 38,
+      "letterSpacing": -0.3
+    },
+    "displaySm": {
+      "fontFamily": "Fraunces",
+      "fontWeight": "400",
+      "fontSize": 22,
+      "lineHeight": 28,
+      "letterSpacing": 0
+    },
+    "heading": {
+      "fontFamily": "General Sans",
+      "fontWeight": "600",
+      "fontSize": 19,
+      "lineHeight": 25,
+      "letterSpacing": -0.5
+    },
+    "title": {
+      "fontFamily": "General Sans",
+      "fontWeight": "600",
+      "fontSize": 17,
+      "lineHeight": 23,
+      "letterSpacing": -0.3
+    },
+    "body": {
+      "fontFamily": "General Sans",
+      "fontWeight": "400",
+      "fontSize": 15,
+      "lineHeight": 22,
+      "letterSpacing": 0
+    },
+    "bodyMedium": {
+      "fontFamily": "General Sans",
+      "fontWeight": "500",
+      "fontSize": 15,
+      "lineHeight": 22,
+      "letterSpacing": 0
+    },
+    "caption": {
+      "fontFamily": "General Sans",
+      "fontWeight": "400",
+      "fontSize": 13,
+      "lineHeight": 18,
+      "letterSpacing": 0
+    },
+    "micro": {
+      "fontFamily": "General Sans",
+      "fontWeight": "500",
+      "fontSize": 12,
+      "lineHeight": 16,
+      "letterSpacing": 0
+    }
+  }
+}

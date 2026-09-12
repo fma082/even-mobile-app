@@ -6,6 +6,8 @@
  *
  * Hand-authored values that Figma does not own (motion, element sizes, opacity)
  * live in theme/tokens.ts, which composes this file.
+ *
+ * tokens.generated.json carries the same values for tailwind.config.js.
  */
 
 /** Semantic colors, aliases resolved to hex. */
@@ -82,14 +84,42 @@ export const fontWeight = {
   semibold: "600"
 } as const;
 
-/** Type styles. `letterSpacing` is already converted from % to dp. */
+/** Font faces the type styles require: which file to ship, and the name to register it under. */
+export const fontAssets = [
+  {
+    key: "Fraunces-400",
+    family: "Fraunces",
+    weight: "400",
+    file: "Fraunces-Regular"
+  },
+  {
+    key: "GeneralSans-500",
+    family: "General Sans",
+    weight: "500",
+    file: "GeneralSans-Medium"
+  },
+  {
+    key: "GeneralSans-400",
+    family: "General Sans",
+    weight: "400",
+    file: "GeneralSans-Regular"
+  },
+  {
+    key: "GeneralSans-600",
+    family: "General Sans",
+    weight: "600",
+    file: "GeneralSans-Semibold"
+  }
+] as const;
+
+/** Type styles. `fontSize`, `lineHeight` and `letterSpacing` are all in dp. */
 export const typography = {
   displayLg: {
     fontFamily: "Fraunces",
     fontWeight: "400",
     fontSize: 32,
     lineHeight: 38,
-    letterSpacing: -0.096
+    letterSpacing: -0.3
   },
   displaySm: {
     fontFamily: "Fraunces",
@@ -103,14 +133,14 @@ export const typography = {
     fontWeight: "600",
     fontSize: 19,
     lineHeight: 25,
-    letterSpacing: -0.095
+    letterSpacing: -0.5
   },
   title: {
     fontFamily: "General Sans",
     fontWeight: "600",
     fontSize: 17,
     lineHeight: 23,
-    letterSpacing: -0.051
+    letterSpacing: -0.3
   },
   body: {
     fontFamily: "General Sans",

@@ -1,83 +1,32 @@
 /**
- * Even design tokens — the SINGLE SOURCE OF TRUTH for color, space, radius, type and motion.
+ * Even design tokens — the single entry point for every visual value in the app.
  *
- * PROVISIONAL: the blue direction is validated, the Figma rework is pending. Change values
- * here only — tailwind.config.js, app.config.ts and every component derive from this file.
+ * Colour, spacing, radius and type come from Figma via tokens/even-tokens.json and are
+ * REGENERATED (`npm run tokens`); never edit them here. Motion, element sizes and opacity
+ * are authored below, because Figma does not describe them — a token re-export must never
+ * silently reset the spring that makes the decision card land.
  *
- * Keep this file plain data + pure helpers (no React Native imports): it is also loaded by
- * Tailwind and the Expo config at build time.
+ * Keep this file plain data + pure helpers (no React Native imports): app.config.ts loads it
+ * at build time.
  */
+import {
+  colors,
+  fontFamily,
+  fontWeight,
+  gradient,
+  gradientStops,
+  radius,
+  spacing,
+  typography,
+} from './tokens.generated';
 
-const colors = {
-  bg: '#FFFFFF',
-  surface: '#FFFFFF',
-  surfaceSunken: '#F5F5F7',
-  ink: '#1A1A1F',
-  ink2: '#71717A',
-  ink3: '#AEAEB6',
-  line: '#EEEEF2',
-  lineStrong: '#E4E4EA',
-  accent: '#4C82F7',
-  accentWeak: '#EDF3FE',
-  accentInk: '#FFFFFF',
-  transparent: 'transparent',
-} as const;
+/** `#RRGGBB` + alpha → `rgba()`. Pure, so it is safe at build time too. */
+export function withAlpha(hex: string, alpha: number): string {
+  const n = parseInt(hex.replace('#', ''), 16);
+  return `rgba(${(n >> 16) & 255}, ${(n >> 8) & 255}, ${n & 255}, ${alpha})`;
+}
 
-/** Presence orb + gradient text, in stop order. */
-const gradient = ['#6CA4FF', '#8196FF', '#A78BFA'] as const;
-
-/** Base-4 scale. Keys follow Tailwind's convention (key × 4 = px), so `p-4` is 16. */
-const spacing = {
-  0: 0,
-  0.5: 2,
-  1: 4,
-  2: 8,
-  3: 12,
-  4: 16,
-  5: 20,
-  6: 24,
-  8: 32,
-  10: 40,
-  12: 48,
-} as const;
-
-const radius = {
-  none: 0,
-  sm: 12,
-  md: 16,
-  lg: 20,
-  xl: 24,
-  full: 999,
-} as const;
-
-/** Family names registered at runtime; files are matched by name in assets/fonts/. */
-const fontFamily = {
-  regular: 'GeneralSans-Regular',
-  medium: 'GeneralSans-Medium',
-  semibold: 'GeneralSans-Semibold',
-} as const;
-
-type FontWeight = '400' | '500' | '600';
-
-type TypeStyle = {
-  fontSize: number;
-  lineHeight: number;
-  fontWeight: FontWeight;
-  family: keyof typeof fontFamily;
-  letterSpacing: number;
-};
-
-const type = {
-  display: { fontSize: 27, lineHeight: 34, fontWeight: '600', family: 'semibold', letterSpacing: -0.4 },
-  title: { fontSize: 22, lineHeight: 28, fontWeight: '600', family: 'semibold', letterSpacing: -0.3 },
-  heading: { fontSize: 19, lineHeight: 24, fontWeight: '600', family: 'semibold', letterSpacing: -0.2 },
-  body: { fontSize: 15, lineHeight: 22, fontWeight: '400', family: 'regular', letterSpacing: 0 },
-  bodyStrong: { fontSize: 15, lineHeight: 22, fontWeight: '500', family: 'medium', letterSpacing: 0 },
-  small: { fontSize: 13, lineHeight: 18, fontWeight: '400', family: 'regular', letterSpacing: 0 },
-  caption: { fontSize: 12, lineHeight: 16, fontWeight: '500', family: 'medium', letterSpacing: 0.1 },
-} as const satisfies Record<string, TypeStyle>;
-
-/** Fixed element sizes (dp). */
+/** Fixed element sizes (dp). Geometry, not design tokens. */
 const size = {
   hairline: 1,
   dot: 6,
@@ -87,7 +36,6 @@ const size = {
   iconButton: 40,
   focusRing: 2,
   orb: 136,
-  wordmarkWidth: 72,
   wordmarkHeight: 34,
   tabBarHeight: 56,
   tabBarFade: 24,
@@ -103,14 +51,15 @@ const opacity = {
 } as const;
 
 /**
- * Motion. Everything answers a user action, except the presence `breath` (the ONE
- * persistent loop) and the decision chip `pulse`. Durations in ms.
+ * Motion. Everything answers a user action, except the presence `breath` (the ONE persistent
+ * loop) and the decision chip `pulse`. Durations in ms.
  */
 const motion = {
   duration: { fast: 120, base: 220, slow: 420, breath: 3600, pulse: 1400 },
   pressScale: 0.97,
   spring: {
     press: { damping: 22, stiffness: 340, mass: 0.6 },
+    /** Deliberately under-damped: the card overshoots slightly, then settles. */
     surface: { damping: 15, stiffness: 130, mass: 1 },
     presence: { damping: 14, stiffness: 90, mass: 1 },
   },
@@ -126,23 +75,22 @@ const motion = {
   pulse: { opacityFrom: 0.5, scaleTo: 2.4 },
 } as const;
 
-/** `#RRGGBB` + alpha → `rgba()`. Pure, so it is safe at build time too. */
-export function withAlpha(hex: string, alpha: number): string {
-  const n = parseInt(hex.replace('#', ''), 16);
-  return `rgba(${(n >> 16) & 255}, ${(n >> 8) & 255}, ${n & 255}, ${alpha})`;
-}
-
 const shadow = {
+  /** The card's drop shadow — an accent-tinted glow, not a grey box shadow. */
   card: `0px 8px 24px 0px ${withAlpha(colors.accent, opacity.cardGlow)}`,
+  /** Inner top highlight that reads as a bevel on raised surfaces. */
+  bevel: `inset 0px 1px 0px 0px ${withAlpha(colors.surface, 0.9)}`,
 } as const;
 
 export const tokens = {
   colors,
   gradient,
+  gradientStops,
   spacing,
   radius,
   fontFamily,
-  type,
+  fontWeight,
+  type: typography,
   size,
   opacity,
   motion,
@@ -150,6 +98,4 @@ export const tokens = {
 } as const;
 
 export type Tokens = typeof tokens;
-export type ColorToken = keyof typeof colors;
-export type TypeVariant = keyof typeof type;
-export type SpacingToken = keyof typeof spacing;
+export type { ColorToken, RadiusToken, SpacingToken, TypeVariant } from './tokens.generated';
