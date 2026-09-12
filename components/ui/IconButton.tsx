@@ -12,7 +12,7 @@ export type IconButtonProps = Omit<PressableScaleProps, 'children' | 'accessibil
   tone?: IconTone;
 };
 
-/** Circular control. `raised` carries the same bevel treatment as Card, at button scale. */
+/** Circular control. `raised` carries the same surface treatment as Card, at button scale. */
 export function IconButton({
   icon,
   variant = 'raised',
@@ -34,7 +34,9 @@ export function IconButton({
       )}
       style={[
         { width: tokens.size.iconButton, height: tokens.size.iconButton },
-        raised && { boxShadow: tokens.shadow.bevel },
+        // A soft lift only. An inset shadow on a rounded-full view is what Android was
+        // painting as a grey disc behind the glyph.
+        raised && tokens.elevation.control,
         style,
       ]}
       {...rest}>

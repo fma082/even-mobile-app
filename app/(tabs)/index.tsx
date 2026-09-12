@@ -15,8 +15,11 @@ import { useHomeEntrance, useSurfaceEntrance } from '@/hooks/useHomeEntrance';
 import { useAppStore } from '@/store/app';
 import { tokens } from '@/theme/tokens';
 
-/** Full-bleed backdrop: barely-there warm white falling to the canvas grey. */
-const backdrop = [tokens.colors.surface, tokens.colors.canvas] as const;
+/**
+ * Full-bleed backdrop, white falling to the sunken grey. It deliberately does NOT end on
+ * `canvas`: that sits 1.5% off white, so the gradient was invisible on device.
+ */
+const backdrop = [tokens.colors.surface, tokens.colors.surfaceSunken] as const;
 
 export default function HomeScreen() {
   const insets = useSafeAreaInsets();

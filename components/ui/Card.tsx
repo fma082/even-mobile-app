@@ -5,16 +5,9 @@ import { tokens } from '@/theme/tokens';
 
 import { PressableScale } from './PressableScale';
 
-/**
- * Drop shadow plus an inset top highlight. The highlight is what reads as a bevel: it lightens
- * the hairline border along the top edge only, so the card looks lit from above rather than
- * outlined. RN 0.86 supports inset boxShadow, so no overlay view is needed.
- */
-const raisedShadow = `${tokens.shadow.card}, ${tokens.shadow.bevel}`;
-
 export type CardProps = ViewProps & {
   className?: string;
-  /** `raised`: white, hairline + accent glow. `sunken`: a quiet grey well. */
+  /** `raised`: a white surface floating above the canvas. `sunken`: a quiet grey well. */
   tone?: 'raised' | 'sunken';
   /** Supplying this makes the whole card a button (scale-down + haptic). */
   onPress?: () => void;
@@ -29,7 +22,9 @@ export function Card({ tone = 'raised', className, style, onPress, ...rest }: Ca
     raised ? 'border border-subtle bg-surface' : 'bg-surface-sunken',
     className,
   );
-  const shadow = raised && { boxShadow: raisedShadow };
+  // The border carries the edge; the shadow carries the lift. No inset highlight — it would be
+  // white on white, and Android renders inset shadows unreliably.
+  const lift = raised && tokens.elevation.card;
 
   if (onPress) {
     return (
@@ -37,11 +32,11 @@ export function Card({ tone = 'raised', className, style, onPress, ...rest }: Ca
         accessibilityRole="button"
         onPress={onPress}
         className={classes}
-        style={[shadow, style]}
+        style={[lift, style]}
         {...rest}
       />
     );
   }
 
-  return <View className={classes} style={[shadow, style]} {...rest} />;
+  return <View className={classes} style={[lift, style]} {...rest} />;
 }

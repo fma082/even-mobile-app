@@ -35,7 +35,9 @@ export function TabBar({ state, descriptors, navigation }: BottomTabBarProps) {
         pointerEvents="none"
         style={[styles.fade, { top: -tokens.size.tabBarFade, height: tokens.size.tabBarFade }]}
       />
-      <View className="flex-row" style={{ height: tokens.size.tabBarHeight }}>
+      {/* flex-1 items already divide the row evenly, so the only thing missing was a gutter:
+          without it the outer labels sit flush against the screen edges. */}
+      <View className="flex-row px-8" style={{ height: tokens.size.tabBarHeight }}>
         {state.routes.map((route, index) => {
           const { options } = descriptors[route.key];
           const focused = state.index === index;
@@ -59,7 +61,7 @@ export function TabBar({ state, descriptors, navigation }: BottomTabBarProps) {
               accessibilityLabel={options.tabBarAccessibilityLabel ?? label}
               onPress={onPress}
               onLongPress={() => navigation.emit({ type: 'tabLongPress', target: route.key })}
-              className="flex-1 items-center justify-center gap-4">
+              className="flex-1 items-center justify-center gap-4 px-4">
               {options.tabBarIcon?.({
                 focused,
                 color: focused ? tokens.colors.iconActive : tokens.colors.iconMuted,

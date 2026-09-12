@@ -57,7 +57,6 @@ const size = {
 const opacity = {
   pressed: 0.7,
   disabled: 0.4,
-  cardGlow: 0.1,
   orbCore: 1,
   orbHalo: 0.35,
 } as const;
@@ -87,11 +86,33 @@ const motion = {
   pulse: { opacityFrom: 0.5, scaleTo: 2.4 },
 } as const;
 
-const shadow = {
-  /** The card's drop shadow — an accent-tinted glow, not a grey box shadow. */
-  card: `0px 8px 24px 0px ${withAlpha(colors.accent, opacity.cardGlow)}`,
-  /** Inner top highlight that reads as a bevel on raised surfaces. */
-  bevel: `inset 0px 1px 0px 0px ${withAlpha(colors.surface, 0.9)}`,
+/**
+ * Drop shadows, as RN style props rather than a `boxShadow` string.
+ *
+ * iOS reads shadowColor/Offset/Opacity/Radius and ignores `elevation`; Android reads
+ * `elevation` (plus shadowColor on API 28+) and ignores the rest — so one object covers both
+ * with no Platform branch, which also keeps this file free of react-native imports.
+ *
+ * Deliberately NOT inset: a white inner highlight on a white surface is invisible, and the
+ * separation a raised surface needs comes from the border plus a neutral shadow.
+ */
+const elevation = {
+  /** A card floating above the canvas. */
+  card: {
+    shadowColor: colors.textPrimary,
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.08,
+    shadowRadius: 16,
+    elevation: 4,
+  },
+  /** A small control — icon buttons, pills. */
+  control: {
+    shadowColor: colors.textPrimary,
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.06,
+    shadowRadius: 3,
+    elevation: 2,
+  },
 } as const;
 
 export const tokens = {
@@ -106,7 +127,7 @@ export const tokens = {
   size,
   opacity,
   motion,
-  shadow,
+  elevation,
 } as const;
 
 export type Tokens = typeof tokens;
