@@ -13,9 +13,14 @@ import { tokens } from '@/theme/tokens';
 
 const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
 
-// NativeWind only resolves `className` on components it knows; register the animated wrapper
-// so layout classes (flex-1, rounded-*, bg-*) reach it instead of being dropped.
-cssInterop(AnimatedPressable, { className: 'style' });
+/**
+ * NativeWind only resolves `className` on components it knows about.
+ *
+ * cssInterop RETURNS the wrapped component — it does not mutate its argument — so the return
+ * value is what must be rendered. Dropping it silently breaks native only: on web `className`
+ * reaches the DOM and CSS applies it regardless, so the failure does not show up in a browser.
+ */
+const StyledPressable = cssInterop(AnimatedPressable, { className: 'style' });
 
 const focusRing: ViewStyle = {
   outlineColor: tokens.colors.accent,
@@ -53,7 +58,7 @@ export function PressableScale({
   const animatedStyle = useAnimatedStyle(() => ({ transform: [{ scale: scale.get() }] }));
 
   return (
-    <AnimatedPressable
+    <StyledPressable
       {...rest}
       onPressIn={(e) => {
         if (!reduceMotion) scale.set(withSpring(pressedScale, tokens.motion.spring.press));
