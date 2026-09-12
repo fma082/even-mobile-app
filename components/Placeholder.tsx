@@ -21,17 +21,17 @@ export function Placeholder({
 
   return (
     <View
-      className="flex-1 items-center justify-center gap-4 bg-bg px-6"
+      className="flex-1 items-center justify-center gap-16 bg-canvas px-24"
       style={{ paddingTop: insets.top, paddingBottom: insets.bottom }}>
       <Text variant="title" accessibilityRole="header">
         {title}
       </Text>
       {note ? (
-        <Text variant="small" tone="ink3">
+        <Text variant="caption" tone="muted">
           {note}
         </Text>
       ) : null}
-      <View className="mt-4 gap-2">
+      <View className="mt-16 gap-8">
         {links.map((link) => (
           <Button
             key={link.label}
@@ -40,7 +40,7 @@ export function Placeholder({
             onPress={() => (link.replace ? router.replace(link.href) : router.push(link.href))}
           />
         ))}
-        {router.canGoBack() ? <Button label="Volver" variant="ghost" onPress={router.back} /> : null}
+        {router.canGoBack() ? <Button label="Back" variant="ghost" onPress={router.back} /> : null}
       </View>
     </View>
   );

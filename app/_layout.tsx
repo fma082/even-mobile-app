@@ -26,11 +26,11 @@ export default function RootLayout() {
 
   useEffect(() => {
     if (!ready) return;
-    if (error) console.warn('[fonts] General Sans failed to load — using system font.', error);
+    if (error) console.warn('[fonts] Brand fonts failed to load — using the system font.', error);
     else setLoadedFonts(Object.keys(brandFonts.sources));
     if (brandFonts.missing.length > 0) {
       console.info(
-        `[fonts] Missing ${brandFonts.missing.join(', ')} — falling back to system font. ` +
+        `[fonts] Missing ${brandFonts.missing.join(', ')} — falling back to the system font. ` +
           'Drop the files into assets/fonts/ and restart with `npx expo start -c`.',
       );
     }
@@ -46,7 +46,7 @@ export default function RootLayout() {
         <Stack
           screenOptions={{
             headerShown: false,
-            contentStyle: { backgroundColor: tokens.colors.bg },
+            contentStyle: { backgroundColor: tokens.colors.canvas },
           }}>
           <Stack.Screen name="(tabs)" />
           <Stack.Screen name="(onboarding)" />

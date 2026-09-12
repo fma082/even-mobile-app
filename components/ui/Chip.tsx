@@ -1,26 +1,28 @@
-import type { ReactNode } from 'react';
 import { View } from 'react-native';
 
 import { cx } from '@/lib/cx';
 
+import { PulseDot } from './PulseDot';
 import { Text } from './Text';
 
 export type ChipProps = {
   label: string;
-  /** e.g. a <PulseDot />. */
-  leading?: ReactNode;
   tone?: 'accent' | 'neutral';
+  /** The pulsing dot marks a live signal; drop it for static labels. */
+  live?: boolean;
 };
 
-export function Chip({ label, leading, tone = 'accent' }: ChipProps) {
+export function Chip({ label, tone = 'accent', live = true }: ChipProps) {
+  const accent = tone === 'accent';
+
   return (
     <View
       className={cx(
-        'flex-row items-center gap-2 self-start rounded-full px-3 py-1',
-        tone === 'accent' ? 'bg-accentWeak' : 'bg-surfaceSunken',
+        'flex-row items-center gap-8 self-start rounded-full px-12 py-4',
+        accent ? 'bg-accent-weak' : 'bg-surface-sunken',
       )}>
-      {leading}
-      <Text variant="caption" tone={tone === 'accent' ? 'accent' : 'ink2'}>
+      {live ? <PulseDot /> : null}
+      <Text variant="micro" tone={accent ? 'accent' : 'secondary'}>
         {label}
       </Text>
     </View>

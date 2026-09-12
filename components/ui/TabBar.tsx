@@ -5,20 +5,22 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { tokens, withAlpha } from '@/theme/tokens';
 
-import { Icon, type IconName } from './Icon';
+import { Icon, type IconName, type IconTone } from './Icon';
 import { PressableScale } from './PressableScale';
 import { Text, type Tone } from './Text';
 
-const activeTone: Tone = 'accent';
-const idleTone: Tone = 'ink3';
+const activeTone: IconTone = 'active';
+const idleTone: IconTone = 'muted';
+const activeLabel: Tone = 'accent';
+const idleLabel: Tone = 'muted';
 
-// Content dissolves into the bar instead of being cut by it.
-const fade = [withAlpha(tokens.colors.bg, 0), tokens.colors.bg] as const;
+// Content dissolves into the bar instead of being cut off by it.
+const fade = [withAlpha(tokens.colors.canvas, 0), tokens.colors.canvas] as const;
 
-/** `tabBarIcon` factory so screens only name the icon; focus color lives here. */
+/** `tabBarIcon` factory so screens only name the icon; focus colour lives here. */
 export const tabIcon =
   (name: IconName) =>
-  ({ focused }: { focused: boolean }) => <Icon name={name} color={focused ? activeTone : idleTone} />;
+  ({ focused }: { focused: boolean }) => <Icon name={name} tone={focused ? activeTone : idleTone} />;
 
 export function TabBar({ state, descriptors, navigation }: BottomTabBarProps) {
   const insets = useSafeAreaInsets();
@@ -26,7 +28,7 @@ export function TabBar({ state, descriptors, navigation }: BottomTabBarProps) {
   return (
     <View
       accessibilityRole="tablist"
-      className="border-t border-line bg-bg"
+      className="border-t border-subtle bg-canvas"
       style={{ paddingBottom: insets.bottom }}>
       <LinearGradient
         colors={fade}
@@ -38,7 +40,6 @@ export function TabBar({ state, descriptors, navigation }: BottomTabBarProps) {
           const { options } = descriptors[route.key];
           const focused = state.index === index;
           const label = options.title ?? route.name;
-          const tone = focused ? activeTone : idleTone;
 
           const onPress = () => {
             const event = navigation.emit({
@@ -58,13 +59,13 @@ export function TabBar({ state, descriptors, navigation }: BottomTabBarProps) {
               accessibilityLabel={options.tabBarAccessibilityLabel ?? label}
               onPress={onPress}
               onLongPress={() => navigation.emit({ type: 'tabLongPress', target: route.key })}
-              className="flex-1 items-center justify-center gap-1">
+              className="flex-1 items-center justify-center gap-4">
               {options.tabBarIcon?.({
                 focused,
-                color: tokens.colors[tone],
+                color: focused ? tokens.colors.iconActive : tokens.colors.iconMuted,
                 size: tokens.size.icon,
               })}
-              <Text variant="caption" tone={tone}>
+              <Text variant="micro" tone={focused ? activeLabel : idleLabel}>
                 {label}
               </Text>
             </PressableScale>

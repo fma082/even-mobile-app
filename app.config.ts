@@ -11,13 +11,13 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
   ...config,
   name: config.name ?? 'Even',
   slug: config.slug ?? 'even',
-  backgroundColor: tokens.colors.bg,
+  backgroundColor: tokens.colors.canvas,
   plugins: [
     ...(config.plugins ?? []),
     [
       'expo-splash-screen',
       {
-        backgroundColor: tokens.colors.bg,
+        backgroundColor: tokens.colors.canvas,
         image: './assets/images/splash-icon.png',
         imageWidth: 76,
       },

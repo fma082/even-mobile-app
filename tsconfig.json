@@ -2,6 +2,10 @@
   "extends": "expo/tsconfig.base",
   "compilerOptions": {
     "strict": true,
+    // For scripts/ (the token generator) and app.config.ts, which run in node, not on device.
+    "types": [
+      "node"
+    ],
     "paths": {
       "@/*": [
         "./*"

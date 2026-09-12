@@ -26,6 +26,18 @@ export function withAlpha(hex: string, alpha: number): string {
   return `rgba(${(n >> 16) & 255}, ${(n >> 8) & 255}, ${n & 255}, ${alpha})`;
 }
 
+/**
+ * The accent gradient's rotation token → LinearGradient `start`/`end`.
+ * Tokens Studio measures in degrees clockwise from straight up, so 0 runs bottom-to-top and
+ * the token's 100 gives a left-to-right sweep tilted slightly downward.
+ */
+export function gradientDirection(rotation: number = gradient.rotation) {
+  const rad = (rotation * Math.PI) / 180;
+  const dx = Math.sin(rad) / 2;
+  const dy = -Math.cos(rad) / 2;
+  return { start: { x: 0.5 - dx, y: 0.5 - dy }, end: { x: 0.5 + dx, y: 0.5 + dy } };
+}
+
 /** Fixed element sizes (dp). Geometry, not design tokens. */
 const size = {
   hairline: 1,

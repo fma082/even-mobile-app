@@ -5,7 +5,7 @@ export default function HandoffScreen() {
     <Placeholder
       title="Handoff"
       note="Onboarding · 5/5"
-      links={[{ label: 'Ir a Home', href: '/', replace: true }]}
+      links={[{ label: 'Go to Home', href: '/', replace: true }]}
     />
   );
 }

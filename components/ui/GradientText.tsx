@@ -1,50 +1,45 @@
-import { useId } from 'react';
-import { View } from 'react-native';
-import Svg, { Defs, LinearGradient, Stop, Text as SvgText } from 'react-native-svg';
+import MaskedView from '@react-native-masked-view/masked-view';
+import { LinearGradient } from 'expo-linear-gradient';
+import { StyleSheet } from 'react-native';
 
-import { useAppStore } from '@/store/app';
-import { tokens, type TypeVariant } from '@/theme/tokens';
+import { gradientDirection, tokens, type TypeVariant } from '@/theme/tokens';
 
-// Approximate cap height (em) used to optically center the text in its box.
-const CAP_HEIGHT_EM = 0.7;
+import { Text } from './Text';
+
+const { start, end } = gradientDirection();
 
 export type GradientTextProps = {
   children: string;
   variant?: TypeVariant;
-  width: number;
-  height: number;
 };
 
-/** Single-line text filled with the brand gradient (the "Even" wordmark). */
-export function GradientText({ children, variant = 'display', width, height }: GradientTextProps) {
-  const t = tokens.type[variant];
-  const family = tokens.fontFamily[t.family];
-  const hasBrandFont = useAppStore((s) => s.loadedFonts.includes(family));
-  const id = `grad${useId().replace(/[^a-zA-Z0-9]/g, '')}`;
-  const lastStop = tokens.gradient.length - 1;
+/**
+ * Text filled with the brand gradient (the "Even" wordmark).
+ *
+ * The string is rendered twice on purpose: once as the mask that cuts the gradient to the
+ * glyph shapes, and once invisibly inside the gradient so the gradient inherits the text's
+ * intrinsic size. That keeps the wordmark correct at any type scale without hard-coded
+ * width/height, which would clip as soon as the font or size token changed.
+ */
+export function GradientText({ children, variant = 'displaySm' }: GradientTextProps) {
+  const label = (
+    <Text variant={variant} style={styles.mask}>
+      {children}
+    </Text>
+  );
 
   return (
-    <View accessible accessibilityRole="text" accessibilityLabel={children} style={{ width, height }}>
-      <Svg width={width} height={height}>
-        <Defs>
-          <LinearGradient id={id} x1="0" y1="0" x2="1" y2="0">
-            {tokens.gradient.map((color, i) => (
-              <Stop key={color} offset={i / lastStop} stopColor={color} />
-            ))}
-          </LinearGradient>
-        </Defs>
-        <SvgText
-          x={width / 2}
-          y={(height + t.fontSize * CAP_HEIGHT_EM) / 2}
-          textAnchor="middle"
-          fill={`url(#${id})`}
-          fontSize={t.fontSize}
-          letterSpacing={t.letterSpacing}
-          fontFamily={hasBrandFont ? family : undefined}
-          fontWeight={hasBrandFont ? undefined : t.fontWeight}>
+    <MaskedView accessible accessibilityRole="header" accessibilityLabel={children} maskElement={label}>
+      <LinearGradient colors={tokens.gradientStops} start={start} end={end}>
+        <Text variant={variant} style={styles.sizer} accessibilityElementsHidden importantForAccessibility="no">
           {children}
-        </SvgText>
-      </Svg>
-    </View>
+        </Text>
+      </LinearGradient>
+    </MaskedView>
   );
 }
+
+const styles = StyleSheet.create({
+  mask: { backgroundColor: 'transparent' },
+  sizer: { opacity: 0 },
+});

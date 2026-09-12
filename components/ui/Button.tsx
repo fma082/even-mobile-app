@@ -1,7 +1,7 @@
 import { cx } from '@/lib/cx';
 import { tokens } from '@/theme/tokens';
 
-import { Icon, type IconName } from './Icon';
+import { Icon, type IconName, type IconTone } from './Icon';
 import { PressableScale, type PressableScaleProps } from './PressableScale';
 import { Text, type Tone } from './Text';
 
@@ -9,14 +9,20 @@ export type ButtonVariant = 'primary' | 'secondary' | 'ghost';
 
 const containerClass: Record<ButtonVariant, string> = {
   primary: 'bg-accent',
-  secondary: 'bg-accentWeak',
+  secondary: 'border border-strong bg-surface',
   ghost: 'bg-transparent',
 };
 
 const labelTone: Record<ButtonVariant, Tone> = {
-  primary: 'accentInk',
-  secondary: 'accent',
+  primary: 'accentOn',
+  secondary: 'primary',
   ghost: 'accent',
+};
+
+const iconTone: Record<ButtonVariant, IconTone> = {
+  primary: 'onAccent',
+  secondary: 'default',
+  ghost: 'active',
 };
 
 export type ButtonProps = Omit<PressableScaleProps, 'children'> & {
@@ -42,16 +48,16 @@ export function Button({
       accessibilityState={{ disabled: Boolean(disabled) }}
       disabled={disabled}
       className={cx(
-        'flex-row items-center justify-center gap-2 rounded-full px-5 py-3',
+        'flex-row items-center justify-center gap-8 rounded-sm px-20 py-12',
         containerClass[variant],
         className,
       )}
       style={[disabled && { opacity: tokens.opacity.disabled }, style]}
       {...rest}>
-      <Text variant="bodyStrong" tone={labelTone[variant]}>
+      <Text variant="bodyMedium" tone={labelTone[variant]}>
         {label}
       </Text>
-      {icon ? <Icon name={icon} color={labelTone[variant]} size={tokens.size.iconSm} /> : null}
+      {icon ? <Icon name={icon} tone={iconTone[variant]} size={tokens.size.iconSm} /> : null}
     </PressableScale>
   );
 }

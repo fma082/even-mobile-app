@@ -6,11 +6,11 @@ export default function DecisionScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   return (
     <Placeholder
-      title="Decisión"
+      title="Decision"
       note={id}
       links={[
-        { label: 'Ajustar', href: { pathname: '/decision/adjust', params: { id } } },
-        { label: 'Aprobar', href: { pathname: '/decision/confirm', params: { id } } },
+        { label: 'Adjust', href: { pathname: '/decision/adjust', params: { id } } },
+        { label: 'Approve', href: { pathname: '/decision/confirm', params: { id } } },
       ]}
     />
   );

@@ -24,35 +24,35 @@ const MOCK_LATENCY_MS = 250;
 const wait = (ms: number) => new Promise<void>((resolve) => setTimeout(resolve, ms));
 
 function mockDecisions(now: Date): Decision[] {
-  const hoursAgo = (h: number) => new Date(now.getTime() - h * 3_600_000).toISOString();
+  const daysAgo = (d: number) => new Date(now.getTime() - d * 86_400_000).toISOString();
   return [
     {
       id: 'dec_income_001',
       signalType: 'income',
-      signalTitle: 'Cobraste más que tu promedio',
-      detectedAt: hoursAgo(2),
+      signalTitle: 'You got paid for a big project',
+      detectedAt: daysAgo(2),
       evidence: [
-        { label: 'Ingreso de Estudio Norte: $ 1.840.000' },
-        { label: '32% por encima de tu promedio de 6 meses' },
-        { label: 'Tu próximo pago de monotributo vence el 20' },
+        { label: 'Payment from Northfield Studio: $12,400' },
+        { label: '32% above your six-month average' },
+        { label: 'Your next quarterly tax payment is due on the 20th' },
       ],
       proposal: {
-        statement: 'Apartar el 25% a tu reserva de impuestos antes de que se mezcle con tus gastos.',
-        params: { percent: 25, amount: 460000 },
-        result: 'Tu reserva cubriría 3 meses de monotributo.',
+        statement: 'I can split it between taxes and your buffer — take a look.',
+        params: { percent: 25, amount: 3100 },
+        result: 'Your reserve would cover three months of tax.',
       },
       status: 'pending',
     },
     {
       id: 'dec_spend_002',
       signalType: 'spend',
-      signalTitle: 'Suscripciones duplicadas',
-      detectedAt: hoursAgo(30),
-      evidence: [{ label: 'Dos cobros de almacenamiento en la nube este mes' }],
+      signalTitle: 'Two subscriptions are overlapping',
+      detectedAt: daysAgo(5),
+      evidence: [{ label: 'Two cloud storage charges this month' }],
       proposal: {
-        statement: 'Cancelar una de las dos suscripciones.',
-        params: { monthlySaving: 4200 },
-        result: 'Ahorrarías $ 50.400 al año.',
+        statement: 'Cancel one of the two and keep the cheaper plan.',
+        params: { monthlySaving: 29 },
+        result: "You'd save $348 a year.",
       },
       status: 'pending',
     },
@@ -75,8 +75,8 @@ export async function askCopilot(prompt: string, context: CopilotContext = {}): 
   //  - Human-over-AI: the model may only EXPLAIN and PROPOSE. Never execute an action from
   //    model output — every action goes through a user-approved, reversible Decision.
   await wait(MOCK_LATENCY_MS);
-  const about = context.decisionId ? ` sobre ${context.decisionId}` : '';
-  return { text: `(mock) Recibí tu pregunta${about}: "${prompt}"`, source: 'mock' };
+  const about = context.decisionId ? ` about ${context.decisionId}` : '';
+  return { text: `(mock) I got your question${about}: "${prompt}"`, source: 'mock' };
 }
 
 export const copilot: CopilotService = { getPendingDecisions, askCopilot };

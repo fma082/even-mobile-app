@@ -1,43 +1,59 @@
-import Svg, { Path } from 'react-native-svg';
+import {
+  Bell,
+  BookOpen,
+  ChartLine,
+  ChevronRight,
+  House,
+  Maximize2,
+  Menu,
+  Settings,
+  type LucideIcon,
+} from 'lucide-react-native';
 
-import { tokens, type ColorToken } from '@/theme/tokens';
+import { tokens } from '@/theme/tokens';
 
-// 24×24 stroke icons. Paths are geometry, not design values.
-const paths = {
-  expand: ['M14 4h6v6', 'M10 20H4v-6', 'M20 4l-6 6', 'M4 20l6-6'],
-  menu: ['M4 9h16', 'M4 15h16'],
-  chevronRight: ['M9 6l6 6-6 6'],
-  home: ['M4 10.5 12 4l8 6.5V19a1 1 0 0 1-1 1h-4.5v-5.5h-5V20H5a1 1 0 0 1-1-1z'],
-  cashflow: ['M4 17l5-5 4 4 7-7', 'M15 9h5v5'],
-  learn: [
-    'M4 5.5A1.5 1.5 0 0 1 5.5 4H11v16H5.5A1.5 1.5 0 0 1 4 18.5z',
-    'M20 5.5A1.5 1.5 0 0 0 18.5 4H13v16h5.5a1.5 1.5 0 0 0 1.5-1.5z',
-  ],
-  settings: ['M4 8h9', 'M17 8h3', 'M4 16h3', 'M11 16h9', 'M15 6v4', 'M9 14v4'],
-} as const satisfies Record<string, readonly string[]>;
+/**
+ * The app's icon vocabulary. Naming them by ROLE rather than by glyph means swapping
+ * ChartLine for TrendingUp is a one-line change here, not a sweep through the screens.
+ */
+const ICONS = {
+  home: House,
+  cashflow: ChartLine,
+  learn: BookOpen,
+  settings: Settings,
+  notifications: Bell,
+  expand: Maximize2,
+  menu: Menu,
+  chevronRight: ChevronRight,
+} as const satisfies Record<string, LucideIcon>;
 
-export type IconName = keyof typeof paths;
+export type IconName = keyof typeof ICONS;
+
+/** Icon colour roles, straight from the semantic `icon.*` tokens. */
+export type IconTone = 'default' | 'muted' | 'active' | 'onAccent';
+
+const toneColor: Record<IconTone, string> = {
+  default: tokens.colors.icon,
+  muted: tokens.colors.iconMuted,
+  active: tokens.colors.iconActive,
+  onAccent: tokens.colors.iconOnAccent,
+};
 
 export type IconProps = {
   name: IconName;
-  color?: ColorToken;
+  tone?: IconTone;
   size?: number;
 };
 
 /** Decorative: label the pressable that contains it, not the icon. */
-export function Icon({ name, color = 'ink', size = tokens.size.icon }: IconProps) {
+export function Icon({ name, tone = 'default', size = tokens.size.icon }: IconProps) {
+  const Glyph = ICONS[name];
   return (
-    <Svg width={size} height={size} viewBox="0 0 24 24" fill="none" pointerEvents="none">
-      {paths[name].map((d) => (
-        <Path
-          key={d}
-          d={d}
-          stroke={tokens.colors[color]}
-          strokeWidth={tokens.size.iconStroke}
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        />
-      ))}
-    </Svg>
+    <Glyph
+      size={size}
+      color={toneColor[tone]}
+      strokeWidth={tokens.size.iconStroke}
+      pointerEvents="none"
+    />
   );
 }

@@ -13,21 +13,20 @@ import Svg, { Circle, Defs, RadialGradient, Stop } from 'react-native-svg';
 
 import { tokens } from '@/theme/tokens';
 
-// Orb geometry in a 100×100 viewBox (shape, not design tokens): a soft halo, and a core lit
-// slightly from the upper left.
+// Orb geometry in a 100×100 viewBox (shape, not design values): a soft halo, and a core lit
+// slightly from the upper left so it reads as a sphere rather than a flat disc.
 const VIEWBOX = 100;
 const CENTER = VIEWBOX / 2;
 const CORE_R = 28;
 const CORE_LIGHT = { cx: 42, cy: 38, r: 34, fx: 38, fy: 32 };
 const HALO_INNER_STOP = 0.45;
-const CORE_MID_STOP = 0.55;
 
-const [g0, g1, g2] = tokens.gradient;
+const [gradStart, gradEnd] = tokens.gradientStops;
 const { breath } = tokens.motion;
 
 /**
  * The co-pilot's presence. Its slow breathing is the ONE persistent motion in the app;
- * with reduced motion it rests at full size.
+ * with reduced motion it simply rests at full size.
  */
 export function PresenceOrb({ size = tokens.size.orb }: { size?: number }) {
   const reduceMotion = useReducedMotion();
@@ -38,7 +37,10 @@ export function PresenceOrb({ size = tokens.size.orb }: { size?: number }) {
     if (reduceMotion) return;
     phase.set(
       withRepeat(
-        withTiming(1, { duration: tokens.motion.duration.breath / 2, easing: Easing.inOut(Easing.sin) }),
+        withTiming(1, {
+          duration: tokens.motion.duration.breath / 2,
+          easing: Easing.inOut(Easing.sin),
+        }),
         -1,
         true,
       ),
@@ -55,7 +57,7 @@ export function PresenceOrb({ size = tokens.size.orb }: { size?: number }) {
     <Animated.View
       accessible
       accessibilityRole="image"
-      accessibilityLabel="Even, tu copiloto"
+      accessibilityLabel="Even, your co-pilot"
       style={[{ width: size, height: size }, breathing]}>
       <Svg width={size} height={size} viewBox={`0 0 ${VIEWBOX} ${VIEWBOX}`}>
         <Defs>
@@ -65,13 +67,12 @@ export function PresenceOrb({ size = tokens.size.orb }: { size?: number }) {
             cy={CENTER}
             r={CENTER}
             gradientUnits="userSpaceOnUse">
-            <Stop offset={HALO_INNER_STOP} stopColor={g1} stopOpacity={tokens.opacity.orbHalo} />
-            <Stop offset={1} stopColor={g2} stopOpacity={0} />
+            <Stop offset={HALO_INNER_STOP} stopColor={gradStart} stopOpacity={tokens.opacity.orbHalo} />
+            <Stop offset={1} stopColor={gradEnd} stopOpacity={0} />
           </RadialGradient>
           <RadialGradient id={`core${id}`} {...CORE_LIGHT} gradientUnits="userSpaceOnUse">
-            <Stop offset={0} stopColor={g0} stopOpacity={tokens.opacity.orbCore} />
-            <Stop offset={CORE_MID_STOP} stopColor={g1} stopOpacity={tokens.opacity.orbCore} />
-            <Stop offset={1} stopColor={g2} stopOpacity={tokens.opacity.orbCore} />
+            <Stop offset={0} stopColor={gradStart} stopOpacity={tokens.opacity.orbCore} />
+            <Stop offset={1} stopColor={gradEnd} stopOpacity={tokens.opacity.orbCore} />
           </RadialGradient>
         </Defs>
         <Circle cx={CENTER} cy={CENTER} r={CENTER} fill={`url(#halo${id})`} />

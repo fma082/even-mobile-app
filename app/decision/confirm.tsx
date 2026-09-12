@@ -3,9 +3,9 @@ import { Placeholder } from '@/components/Placeholder';
 export default function ConfirmDecisionScreen() {
   return (
     <Placeholder
-      title="Listo"
+      title="Done"
       note="Confirmation + undo"
-      links={[{ label: 'Volver a Home', href: '/', replace: true }]}
+      links={[{ label: 'Back to Home', href: '/', replace: true }]}
     />
   );
 }
