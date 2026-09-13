@@ -61,7 +61,7 @@ export function TabBar({ state, descriptors, navigation }: BottomTabBarProps) {
               accessibilityLabel={options.tabBarAccessibilityLabel ?? label}
               onPress={onPress}
               onLongPress={() => navigation.emit({ type: 'tabLongPress', target: route.key })}
-              className="flex-1 items-center justify-center gap-4 px-4">
+              style={styles.item}>
               {options.tabBarIcon?.({
                 focused,
                 color: focused ? tokens.colors.iconActive : tokens.colors.iconMuted,
@@ -80,4 +80,13 @@ export function TabBar({ state, descriptors, navigation }: BottomTabBarProps) {
 
 const styles = StyleSheet.create({
   fade: { position: 'absolute', left: 0, right: 0 },
+  // Resolved styles, not classes — see the note in Card.tsx. `flex: 1` is what divides the row
+  // evenly; without it the labels pack against each other on the left.
+  item: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: tokens.spacing[4],
+    paddingHorizontal: tokens.spacing[4],
+  },
 });

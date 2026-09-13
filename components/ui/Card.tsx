@@ -1,9 +1,34 @@
-import { View, type ViewProps } from 'react-native';
+import { StyleSheet, View, type ViewProps } from 'react-native';
 
-import { cx } from '@/lib/cx';
 import { tokens } from '@/theme/tokens';
 
 import { PressableScale } from './PressableScale';
+
+/**
+ * Container visuals are a RESOLVED STYLE OBJECT, not Tailwind classes.
+ *
+ * NativeWind registers View/Text/Pressable itself, but nothing from Reanimated. PressableScale
+ * renders Animated.createAnimatedComponent(Pressable), and className does not survive on that
+ * component on Android — which is why the card rendered as bare text. Anything that must be
+ * visible goes through `style`; values still come from tokens, never literals.
+ */
+const styles = StyleSheet.create({
+  base: {
+    borderRadius: tokens.radius.lg,
+    padding: tokens.spacing[20],
+    gap: tokens.spacing[16],
+  },
+  raised: {
+    backgroundColor: tokens.colors.surface,
+    // The border is what guarantees the edge: borders always render on Android, shadows do not.
+    borderWidth: tokens.size.hairline,
+    borderColor: tokens.colors.borderSubtle,
+    ...tokens.elevation.card,
+  },
+  sunken: {
+    backgroundColor: tokens.colors.surfaceSunken,
+  },
+});
 
 export type CardProps = ViewProps & {
   className?: string;
@@ -16,27 +41,19 @@ export type CardProps = ViewProps & {
 };
 
 export function Card({ tone = 'raised', className, style, onPress, ...rest }: CardProps) {
-  const raised = tone === 'raised';
-  const classes = cx(
-    'gap-16 rounded-lg p-20',
-    raised ? 'border border-subtle bg-surface' : 'bg-surface-sunken',
-    className,
-  );
-  // The border carries the edge; the shadow carries the lift. No inset highlight — it would be
-  // white on white, and Android renders inset shadows unreliably.
-  const lift = raised && tokens.elevation.card;
+  const base = [styles.base, tone === 'raised' ? styles.raised : styles.sunken, style];
 
   if (onPress) {
     return (
       <PressableScale
         accessibilityRole="button"
         onPress={onPress}
-        className={classes}
-        style={[lift, style]}
+        className={className}
+        style={base}
         {...rest}
       />
     );
   }
 
-  return <View className={classes} style={[lift, style]} {...rest} />;
+  return <View className={className} style={base} {...rest} />;
 }

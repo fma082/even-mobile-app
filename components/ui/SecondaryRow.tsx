@@ -1,11 +1,25 @@
-import { View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 
-import { cx } from '@/lib/cx';
 import { tokens } from '@/theme/tokens';
 
 import { Icon } from './Icon';
 import { PressableScale } from './PressableScale';
 import { Text } from './Text';
+
+// Resolved styles, not classes — see the note in Card.tsx.
+const styles = StyleSheet.create({
+  row: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: tokens.spacing[16],
+    borderRadius: tokens.radius.sm,
+    backgroundColor: tokens.colors.surfaceSunken,
+    paddingHorizontal: tokens.spacing[16],
+    paddingVertical: tokens.spacing[12],
+  },
+  label: { flex: 1, gap: tokens.spacing[2] },
+});
 
 export type SecondaryRowProps = {
   title: string;
@@ -22,11 +36,9 @@ export function SecondaryRow({ title, subtitle, onPress, className }: SecondaryR
       haptic="select"
       accessibilityRole="button"
       accessibilityLabel={subtitle ? `${title}, ${subtitle}` : title}
-      className={cx(
-        'flex-row items-center justify-between gap-16 rounded-sm bg-surface-sunken px-16 py-12',
-        className,
-      )}>
-      <View className="flex-1 gap-2">
+      className={className}
+      style={styles.row}>
+      <View style={styles.label}>
         <Text variant="bodyMedium">{title}</Text>
         {subtitle ? (
           <Text variant="caption" tone="secondary">

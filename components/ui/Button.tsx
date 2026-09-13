@@ -1,4 +1,5 @@
-import { cx } from '@/lib/cx';
+import { StyleSheet } from 'react-native';
+
 import { tokens } from '@/theme/tokens';
 
 import { Icon, type IconName, type IconTone } from './Icon';
@@ -7,10 +8,30 @@ import { Text, type Tone } from './Text';
 
 export type ButtonVariant = 'primary' | 'secondary' | 'ghost';
 
-const containerClass: Record<ButtonVariant, string> = {
-  primary: 'bg-accent',
-  secondary: 'border border-strong bg-surface',
-  ghost: 'bg-transparent',
+// Resolved styles, not classes — see the note in Card.tsx.
+const styles = StyleSheet.create({
+  base: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: tokens.spacing[8],
+    borderRadius: tokens.radius.sm,
+    paddingHorizontal: tokens.spacing[20],
+    paddingVertical: tokens.spacing[12],
+  },
+  primary: { backgroundColor: tokens.colors.accent },
+  secondary: {
+    backgroundColor: tokens.colors.surface,
+    borderWidth: tokens.size.hairline,
+    borderColor: tokens.colors.borderStrong,
+  },
+  ghost: { backgroundColor: 'transparent' },
+});
+
+const variantStyle: Record<ButtonVariant, object> = {
+  primary: styles.primary,
+  secondary: styles.secondary,
+  ghost: styles.ghost,
 };
 
 const labelTone: Record<ButtonVariant, Tone> = {
@@ -47,12 +68,13 @@ export function Button({
       accessibilityLabel={label}
       accessibilityState={{ disabled: Boolean(disabled) }}
       disabled={disabled}
-      className={cx(
-        'flex-row items-center justify-center gap-8 rounded-sm px-20 py-12',
-        containerClass[variant],
-        className,
-      )}
-      style={[disabled && { opacity: tokens.opacity.disabled }, style]}
+      className={className}
+      style={[
+        styles.base,
+        variantStyle[variant],
+        disabled && { opacity: tokens.opacity.disabled },
+        style,
+      ]}
       {...rest}>
       <Text variant="bodyMedium" tone={labelTone[variant]}>
         {label}
