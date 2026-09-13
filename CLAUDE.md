@@ -106,3 +106,5 @@ mandate (what to watch) → handoff (lands on Home, calm).
 Each screen: build from the design-system components, driven by mock data from
 `services/copilot.ts` until the LLM is wired. Keep copy in English, in the co-pilot's calm,
 first-person, plain voice.
+
+@AGENTS.md
