@@ -77,7 +77,7 @@ mandate (what to watch) → handoff (lands on Home, calm).
 - **Tokens are the single source of truth.** `tokens/` holds the design tokens (Tokens Studio
   JSON). `theme/tokens.generated.ts` is generated from it (`npm run tokens`).
   `theme/tokens.ts` **composes** the generated tokens with the hand-authored engineering
-  constants (motion, size, opacity, shadow). A token re-export must **never** overwrite motion.
+  constants (motion, size, opacity, elevation). A token re-export must **never** overwrite motion.
 - **No magic numbers** in components — always theme tokens / Tailwind classes derived from them.
 - **Cross-platform = one design system.** Adapt only platform specifics (safe areas, haptics,
   back gesture) via `Platform` where needed. Do not fork the design.
