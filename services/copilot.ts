@@ -1,6 +1,7 @@
 import Constants from 'expo-constants';
 
-import type { Decision } from '@/types/decision';
+import { formatMoney } from '@/lib/format';
+import type { Decision, DecisionOutcome } from '@/types/decision';
 
 export type CopilotContext = { decisionId?: string };
 
@@ -8,7 +9,12 @@ export type CopilotReply = { text: string; source: 'mock' | 'llm' };
 
 /** The seam the UI depends on. Swap the implementation, not the screens. */
 export interface CopilotService {
-  getPendingDecisions(): Promise<Decision[]>;
+  getDecisions(): Promise<Decision[]>;
+  /** `amount` overrides the proposed one when the user adjusted it. */
+  approveDecision(id: string, amount?: number): Promise<DecisionOutcome>;
+  ignoreDecision(id: string): Promise<Decision>;
+  /** Always available for a resolved decision — there is no undo window. */
+  undoDecision(id: string): Promise<Decision>;
   askCopilot(prompt: string, context?: CopilotContext): Promise<CopilotReply>;
 }
 
@@ -23,7 +29,7 @@ const MOCK_LATENCY_MS = 250;
 
 const wait = (ms: number) => new Promise<void>((resolve) => setTimeout(resolve, ms));
 
-function mockDecisions(now: Date): Decision[] {
+function seedDecisions(now: Date): Decision[] {
   const daysAgo = (d: number) => new Date(now.getTime() - d * 86_400_000).toISOString();
   return [
     {
@@ -32,13 +38,14 @@ function mockDecisions(now: Date): Decision[] {
       signalTitle: 'You got paid for a big project',
       detectedAt: daysAgo(2),
       evidence: [
-        { label: 'Payment from Northfield Studio: $12,400' },
+        { label: 'Payment from Northfield Studio: 12,400' },
         { label: '32% above your six-month average' },
         { label: 'Your next quarterly tax payment is due on the 20th' },
       ],
       proposal: {
         statement: 'I can split it between taxes and your buffer — take a look.',
-        params: { percent: 25, amount: 3100 },
+        // 25% of the payment, adjustable in 100-unit steps up to half of it.
+        adjustable: { amount: 3100, min: 0, max: 6200, step: 100, basis: 12400 },
         result: 'Your reserve would cover three months of tax.',
       },
       status: 'pending',
@@ -51,17 +58,65 @@ function mockDecisions(now: Date): Decision[] {
       evidence: [{ label: 'Two cloud storage charges this month' }],
       proposal: {
         statement: 'Cancel one of the two and keep the cheaper plan.',
-        params: { monthlySaving: 29 },
-        result: "You'd save $348 a year.",
+        adjustable: { amount: 29, min: 0, max: 29, step: 1, basis: 29 },
+        result: "You'd save 348 a year.",
       },
       status: 'pending',
     },
   ];
 }
 
-export async function getPendingDecisions(): Promise<Decision[]> {
+/**
+ * Mock decisions live for the lifetime of the JS context so approve and undo actually persist
+ * across calls. A real implementation replaces this whole module, not just the data.
+ */
+let decisions: Decision[] | null = null;
+
+const all = () => (decisions ??= seedDecisions(new Date()));
+
+function find(id: string): Decision {
+  const decision = all().find((d) => d.id === id);
+  if (!decision) throw new Error(`Unknown decision "${id}"`);
+  return decision;
+}
+
+function replace(next: Decision): Decision {
+  decisions = all().map((d) => (d.id === next.id ? next : d));
+  return next;
+}
+
+export async function getDecisions(): Promise<Decision[]> {
   await wait(MOCK_LATENCY_MS);
-  return mockDecisions(new Date()).filter((d) => d.status === 'pending');
+  return [...all()];
+}
+
+export async function approveDecision(id: string, amount?: number): Promise<DecisionOutcome> {
+  await wait(MOCK_LATENCY_MS);
+  const current = find(id);
+  const approvedAmount = amount ?? current.proposal.adjustable.amount;
+  const decision = replace({
+    ...current,
+    status: 'approved',
+    resolvedAt: new Date().toISOString(),
+    approvedAmount,
+  });
+
+  return {
+    decision,
+    summary: `I set aside ${formatMoney(approvedAmount)}. ${decision.proposal.result}`,
+    reversible: true,
+  };
+}
+
+export async function ignoreDecision(id: string): Promise<Decision> {
+  await wait(MOCK_LATENCY_MS);
+  return replace({ ...find(id), status: 'ignored', resolvedAt: new Date().toISOString() });
+}
+
+export async function undoDecision(id: string): Promise<Decision> {
+  await wait(MOCK_LATENCY_MS);
+  const { resolvedAt: _resolvedAt, approvedAmount: _approvedAmount, ...rest } = find(id);
+  return replace({ ...rest, status: 'pending' });
 }
 
 export async function askCopilot(prompt: string, context: CopilotContext = {}): Promise<CopilotReply> {
@@ -79,4 +134,10 @@ export async function askCopilot(prompt: string, context: CopilotContext = {}): 
   return { text: `(mock) I got your question${about}: "${prompt}"`, source: 'mock' };
 }
 
-export const copilot: CopilotService = { getPendingDecisions, askCopilot };
+export const copilot: CopilotService = {
+  getDecisions,
+  approveDecision,
+  ignoreDecision,
+  undoDecision,
+  askCopilot,
+};

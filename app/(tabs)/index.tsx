@@ -12,7 +12,7 @@ import { PresenceOrb } from '@/components/ui/PresenceOrb';
 import { SecondaryRow } from '@/components/ui/SecondaryRow';
 import { Text } from '@/components/ui/Text';
 import { useHomeEntrance, useSurfaceEntrance } from '@/hooks/useHomeEntrance';
-import { useAppStore } from '@/store/app';
+import { pendingDecisions, useAppStore } from '@/store/app';
 import { tokens } from '@/theme/tokens';
 
 /**
@@ -23,15 +23,16 @@ const backdrop = [tokens.colors.surface, tokens.colors.surfaceSunken] as const;
 
 export default function HomeScreen() {
   const insets = useSafeAreaInsets();
-  const decisions = useAppStore((s) => s.pendingDecisions);
-  const loadPendingDecisions = useAppStore((s) => s.loadPendingDecisions);
+  const decisions = useAppStore((s) => s.decisions);
+  const loadDecisions = useAppStore((s) => s.loadDecisions);
   const { presenceStyle, greetingStyle, cardDelay, reduceMotion } = useHomeEntrance();
 
   useEffect(() => {
-    loadPendingDecisions();
-  }, [loadPendingDecisions]);
+    loadDecisions();
+  }, [loadDecisions]);
 
-  const [featured] = decisions;
+  // The store holds every decision now; Home only ever surfaces one that is still waiting.
+  const [featured] = pendingDecisions(decisions);
 
   return (
     <LinearGradient colors={backdrop} style={styles.fill}>
