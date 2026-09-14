@@ -16,6 +16,14 @@ type AppState = {
   /** The most recent approval, for the confirmation screen. */
   lastOutcome: DecisionOutcome | null;
 
+  /**
+   * Amounts the user is adjusting but has not approved yet, keyed by decision. Kept here rather
+   * than passed through route params so the Adjust sheet can hand the value back to the
+   * decision screen, and so closing the sheet without approving changes nothing real.
+   */
+  draftAmounts: Record<string, number>;
+  setDraftAmount: (id: string, amount: number) => void;
+
   loadDecisions: () => Promise<void>;
   approveDecision: (id: string, amount?: number) => Promise<DecisionOutcome | null>;
   ignoreDecision: (id: string) => Promise<void>;
@@ -41,6 +49,10 @@ export const useAppStore = create<AppState>()((set, get) => ({
   decisionsState: 'idle',
   lastOutcome: null,
 
+  draftAmounts: {},
+  setDraftAmount: (id, amount) =>
+    set((s) => ({ draftAmounts: { ...s.draftAmounts, [id]: amount } })),
+
   loadDecisions: async () => {
     if (get().decisionsState === 'loading') return;
     set({ decisionsState: 'loading' });
@@ -54,10 +66,15 @@ export const useAppStore = create<AppState>()((set, get) => ({
   approveDecision: async (id, amount) => {
     try {
       const outcome = await copilot.approveDecision(id, amount);
-      set((s) => ({
-        decisions: s.decisions.map((d) => (d.id === id ? outcome.decision : d)),
-        lastOutcome: outcome,
-      }));
+      set((s) => {
+        // The draft has been committed; undo restores the proposal, not the half-made edit.
+        const { [id]: _committed, ...draftAmounts } = s.draftAmounts;
+        return {
+          decisions: s.decisions.map((d) => (d.id === id ? outcome.decision : d)),
+          lastOutcome: outcome,
+          draftAmounts,
+        };
+      });
       return outcome;
     } catch {
       return null;

@@ -2,11 +2,15 @@ import {
   Bell,
   BookOpen,
   ChartLine,
+  ChevronLeft,
   ChevronRight,
+  Check,
   House,
   Maximize2,
   Menu,
+  RotateCcw,
   Settings,
+  X,
   type LucideIcon,
 } from 'lucide-react-native';
 
@@ -25,6 +29,10 @@ const ICONS = {
   expand: Maximize2,
   menu: Menu,
   chevronRight: ChevronRight,
+  back: ChevronLeft,
+  close: X,
+  approve: Check,
+  undo: RotateCcw,
 } as const satisfies Record<string, LucideIcon>;
 
 export type IconName = keyof typeof ICONS;
