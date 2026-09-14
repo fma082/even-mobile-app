@@ -103,7 +103,9 @@ export async function approveDecision(id: string, amount?: number): Promise<Deci
 
   return {
     decision,
-    summary: `I set aside ${formatMoney(approvedAmount)}. ${decision.proposal.result}`,
+    // "in your plan" is load-bearing: Even recorded a commitment, it did not move money.
+    summary: `${formatMoney(approvedAmount)} set aside in your plan. ${decision.proposal.result}`,
+    nextStep: "Move it when you're ready.",
     reversible: true,
   };
 }

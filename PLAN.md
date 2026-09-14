@@ -162,15 +162,17 @@ plainly. Worth building last, when there is enough product for the value to be s
 3. **The mandate is proposed, then edited.** Even pre-selects defaults marked *recommended*;
    the user adjusts. Never a blank form, in onboarding or in Settings.
 4. **Even never moves money** — see `CLAUDE.md` §2. It detects, explains and proposes; the user
-   approves and moves it, or confirms a prepared instruction in their bank.
+   approves and moves it in their own bank.
+5. **v1 only RECORDS the commitment.** No bank deep-links, no copyable transfers — that is real
+   integration scope that does not serve the thesis, and an outbound handoff would break the calm
+   end of the confirmation. Even prepares and remembers; the user executes in their own world.
+   D therefore ends in a **state**, not an action. A confirmable instruction is a later phase,
+   and reads as "coming soon" in the case study.
+6. **The confirmation copy is fixed** (`3b86bcb`+): headline *"It's in your plan."*, summary
+   *"$3,100 set aside in your plan…"*, next step *"Move it when you're ready."* `summary` and
+   `nextStep` are separate fields on `DecisionOutcome` because they are different speech acts —
+   one reports, one asks — and Phase 2 gives each its own beat.
 
 ## Still open
 
-- **Copy in D claims Even moved the money, and must be rewritten.** The mock summary reads
-  *"I set aside $3,100"* — but under decision 4 Even set nothing aside; the user does. Something
-  closer to *"$3,100 set aside for taxes — move it when you're ready"* is honest. This also makes
-  undo cleaner than before: nothing left Even, so reverting is genuinely free rather than a
-  compensating transaction. Lives in `services/copilot.ts` `approveDecision`.
-- Whether Even prepares a *confirmable instruction* (deep link into a bank app, a copyable
-  transfer) or simply records the commitment and leaves the mechanics to the user. This decides
-  how much Phase 2 has to show.
+Nothing blocking. The next open call is whatever Phase 0 turns up on the device.

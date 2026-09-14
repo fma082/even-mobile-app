@@ -32,13 +32,20 @@ export default function ConfirmDecisionScreen() {
       style={{ paddingTop: insets.top + tokens.spacing[48], paddingBottom: insets.bottom + tokens.spacing[20] }}>
       <View className="items-center gap-16">
         <Icon name="approve" tone="active" size={tokens.size.orb / 4} />
+        {/* Not "Done." — that would read as though the transfer had happened. Even recorded a
+            commitment; the user still moves the money in their own bank. */}
         <Text variant="displaySm" className="text-center" accessibilityRole="header">
-          Done.
+          It&apos;s in your plan.
         </Text>
         {outcome ? (
-          <Text variant="body" tone="secondary" className="text-center">
-            {outcome.summary}
-          </Text>
+          <>
+            <Text variant="body" tone="secondary" className="text-center">
+              {outcome.summary}
+            </Text>
+            <Text variant="bodyMedium" className="text-center">
+              {outcome.nextStep}
+            </Text>
+          </>
         ) : null}
       </View>
 

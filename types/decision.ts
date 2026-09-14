@@ -62,7 +62,16 @@ export type Decision = {
  */
 export type DecisionOutcome = {
   decision: Decision;
-  /** Plain-language confirmation, first person, co-pilot voice. */
+  /**
+   * What was recorded, in the co-pilot's voice. Even never moved anything — it noted a
+   * commitment — so this must never claim otherwise (see CLAUDE.md §2).
+   */
   summary: string;
+  /**
+   * What the user does next, in their own bank. Separate from `summary` because they are
+   * different speech acts: one reports, one asks. The confirmation screen gives each its own
+   * beat rather than running them together.
+   */
+  nextStep: string;
   reversible: true;
 };
