@@ -10,11 +10,11 @@ For what the code does, read the code.
 
 ## Where the app is
 
-Home is built and runs on device, but **its card and other pressable surfaces do not render
-their containers on Android** — see open item 1, which is parked. Everything else
-(`onboarding/*`, `decision/*`, `content/*`, `paywall`, `cashflow`, `learn`, `settings`) is a
-`Placeholder` stub, present so every route can be walked. The copilot LLM is **not** wired — `services/copilot.ts` returns mock data behind the
-interface the UI depends on.
+Home and the full decision flow (`decision/[id]` → `adjust` → `confirm`) are built. Pressable
+surfaces did not render their containers on Android; the fix is in but **not yet seen on a
+device** — open item 1. `onboarding/*`, `content/*`, `paywall`, `cashflow` and `learn` are still
+`Placeholder` stubs, present so every route can be walked. The copilot LLM is **not** wired —
+`services/copilot.ts` returns mock data behind the interface the UI depends on.
 
 The app ships in **English**. Working conversation is in Spanish; product copy is not.
 
@@ -61,19 +61,22 @@ weight in Figma surfaces as a *named missing file* rather than as silently wrong
 
 ## Traps — read before touching these
 
-### `className` does not reach Reanimated components on Android
+### Never style an `Animated.createAnimatedComponent(...)` node
 
-NativeWind registers `View`, `Text`, `Pressable`, `ScrollView` and friends itself
-(`react-native-css-interop/dist/runtime/components.js`) but **nothing from Reanimated**. So
-`className` on `Animated.createAnimatedComponent(...)` depends on a manual `cssInterop`
-registration, and on Android that does not hold.
+On Android, styling one drops **both** `className` and `style`. Verified on a Moto g75 in Expo
+Go *and* in a development build, so it is not an Expo Go limitation.
 
-Anything whose appearance matters must go through `style`, not `className`. See open item 1 —
-this is live, not solved.
+`components/ui/PressableScale.tsx` is the pattern to copy: an `Animated.View` carries the
+transform and nothing else, and every visible style lands on a **stock `Pressable`**, which both
+React Native and NativeWind fully understand. A `containerStyle` prop exists for the rare case
+where the pressable must claim space in its parent's layout (the tab bar items).
 
-Note `cssInterop` both registers by side effect (`interopComponents.set(base, wrapper)`) **and**
-returns the wrapper; NativeWind's own `components.js` discards the return. "Use the return value"
-is therefore *not* the fix, and was chased once already.
+Two theories chased and disproved, do not repeat them:
+- *"Use the `cssInterop` return value."* It both registers by side effect
+  (`interopComponents.set(base, wrapper)`) **and** returns the wrapper; NativeWind's own
+  `components.js` discards the return. Registration was never the problem.
+- *"Avoid Tailwind, pass resolved `style` objects instead."* Necessary but not sufficient —
+  `style` was being dropped too.
 
 ### A web render cannot validate NativeWind styling
 
@@ -116,13 +119,15 @@ source edits do **not** need `-c`.
 
 | | How |
 | --- | --- |
+| ✅ Android development build (EAS) | installed and running on a Moto g75 |
 | ✅ iOS + Android Metro bundle | `npx expo export`, both platforms, clean |
 | ✅ TypeScript strict, no `any` | `npx tsc --noEmit` |
 | ✅ Home composition + English copy | headless Chrome render |
 | ✅ Backdrop gradient reaches `#F5F5F7` | sampled pixels from the render |
 | ✅ General Sans + Fraunces load | 4 DOM refs, visually confirmed on device |
-| ❌ Card renders a container on Android | **verified broken on Moto g75, works on web** — see open item 1 |
-| ⚠️ The resolved-style fix (`e287766`) | pushed, **never loaded on a device** |
+| ✅ Expo Go ruled out as the cause | the development build reproduced it identically |
+| ⚠️ Pressable surfaces render on Android | `PressableScale` rewritten; **not yet seen on a device** |
+| ⚠️ The @expo/ui Slider in Adjust | bundles and types; a native control has never mounted here |
 | ⚠️ Wordmark gradient on native | looks blue-violet on Android; not confirmed as a gradient |
 | ⚠️ Reduced-motion behaviour | coded, never exercised |
 | ❌ iOS device/simulator | no full Xcode on this machine — only Command Line Tools |
@@ -131,39 +136,25 @@ source edits do **not** need `-c`.
 
 ## Open items
 
-1. ❌ **The Decision Card renders with no container on Android.** *Verified broken on a Moto g75,
-   works on web — RN/NativeWind + Reanimated className registration.* **Parked 2026-09-14 to move
-   on to the next screen; come back to this.**
+1. ⚠️ **Pressable surfaces did not render their containers on Android.** *Verified broken on a
+   Moto g75 in Expo Go **and** in a development build, so Expo Go is ruled out.* The Decision
+   Card showed as bare text with no surface, border or shadow; `SecondaryRow` lost its background
+   and its `flex-row` (the chevron wrapped below the text); TabBar items lost `flex-1` so the
+   labels ran together; `Button` lost its fill.
 
-   No white surface, no border, no shadow — the card reads as bare text on the background. The
-   same failure hits everything else routed through `PressableScale`: `SecondaryRow` loses its
-   background *and* `flex-row` (the chevron wraps below the text), TabBar items lose `flex-1` so
-   the labels run together, `Button` loses its fill.
+   **Cause, confirmed.** Styling an `Animated.createAnimatedComponent(Pressable)` node drops
+   **both** `className` and `style` on Android. Plain Views (the Chip) always rendered correctly,
+   which was the tell.
 
-   **Cause.** NativeWind registers `View`, `Text` and `Pressable` itself but nothing from
-   Reanimated, so `className` only reaches `PressableScale` — which renders
-   `Animated.createAnimatedComponent(Pressable)` — through a manual `cssInterop` registration
-   that does not hold on Android. Plain Views (the Chip) render correctly, which is the tell.
+   **Fix applied** (`PressableScale`): the `Animated.View` now carries the press transform and
+   nothing else, and every visible style lands on a stock `Pressable`. `cssInterop` is gone from
+   the codebase. `containerStyle` exists for pressables that must claim space in their parent's
+   layout — only the tab bar items do.
 
-   **Two dead ends, do not repeat them:**
-   - *"Use the `cssInterop` return value."* `cssInterop` does `interopComponents.set(base, wrapper)`
-     as a side effect **and** returns the wrapper; NativeWind's own `components.js` discards the
-     return. Registration was never the problem. Cost a device reload.
-   - *A web render cannot see this at all.* On web `className` reaches the DOM and CSS applies it
-     regardless of whether the interop works. Verify on device only.
-
-   **Fix pushed but unverified:** `e287766` moves the container visuals of Card, IconButton,
-   SecondaryRow, Button and the TabBar items to resolved style objects built from tokens, so they
-   no longer depend on `className` at all. **Nobody has loaded this on a device.** When picking
-   this up, load it first — the work may already be done.
-
-   **How to tell whether it worked:** the chevron in `SecondaryRow` must sit to the *right* of the
-   text, on the same line. Do not judge by its background: `#F5F5F7` on a ~`#F8F8F9` backdrop is
-   nearly invisible even when applied correctly.
-
-   **If it is still broken,** the next thing to try is keeping `className` off the animated node
-   entirely — carry the press transform on a wrapper and let a stock `Pressable` (which NativeWind
-   registers) hold the styling — rather than fighting the registration.
+   **Still unverified on a device.** When picking this up, load it and check **the chevron in
+   `SecondaryRow`: it must sit to the right of the text, on the same line.** Do not judge by its
+   background — `#F5F5F7` on a ~`#F8F8F9` backdrop is nearly invisible even when applied
+   correctly. If it renders, close this item and the ⚠️ rows in the table above.
 
 2. **Tracking units disagree with Figma.** The export writes `-0.3%`, which as a true percentage
    of a 32px display is −0.096dp (invisible). It is read as −0.3dp. Fix the unit in Tokens Studio

@@ -61,6 +61,7 @@ export function TabBar({ state, descriptors, navigation }: BottomTabBarProps) {
               accessibilityLabel={options.tabBarAccessibilityLabel ?? label}
               onPress={onPress}
               onLongPress={() => navigation.emit({ type: 'tabLongPress', target: route.key })}
+              containerStyle={styles.itemContainer}
               style={styles.item}>
               {options.tabBarIcon?.({
                 focused,
@@ -80,8 +81,9 @@ export function TabBar({ state, descriptors, navigation }: BottomTabBarProps) {
 
 const styles = StyleSheet.create({
   fade: { position: 'absolute', left: 0, right: 0 },
-  // Resolved styles, not classes — see the note in Card.tsx. `flex: 1` is what divides the row
-  // evenly; without it the labels pack against each other on the left.
+  // `flex: 1` has to be on the ANIMATED WRAPPER, because that is the direct child of the row —
+  // that is what divides the row evenly. The inner Pressable then fills the wrapper.
+  itemContainer: { flex: 1 },
   item: {
     flex: 1,
     alignItems: 'center',

@@ -33,6 +33,14 @@
     "experiments": {
       "typedRoutes": true,
       "reactCompiler": true
-    }
+    },
+    "extra": {
+      "copilot": {},
+      "router": {},
+      "eas": {
+        "projectId": "e228d9af-e097-4562-9c78-9420e96aed6d"
+      }
+    },
+    "owner": "byfma"
   }
 }
