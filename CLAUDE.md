@@ -28,6 +28,13 @@ The app ships in **English**. The maintainer communicates in Spanish; product co
 - **Human over AI (the product's signature).** Even never acts without permission, always
   shows the why before the ask, and every action is reversible (undo). Even its *reading* of
   the user is correctable.
+- **Even never holds or moves the money.** It detects, explains and proposes; the **user**
+  approves and moves it, or confirms an instruction Even prepared, in their own bank. Two
+  reasons, and both are load-bearing: it keeps Even entirely outside money-transmitter
+  regulation, and it makes "human over AI" structural rather than stated — the AI never holds
+  the key. **Consequence:** the LLM proxy is key-security hygiene, *not* a regulatory
+  requirement. Approving in Even records a commitment; it does not execute a transfer, and
+  copy must never imply otherwise.
 - **The "Decision" is the core reusable object.** Anatomy, in order:
   **Signal → Why (evidence) → Proposal → Control (Approve / Adjust / Ignore) → Reversible
   result (undo).** Evidence always comes *before* the proposal.

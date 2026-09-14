@@ -18,9 +18,9 @@ Three rules for every confirmation in this app:
 
 1. **One-shot, orchestrated — never a loop.** A sequence with a beginning and an end. Loops
    belong to the orb alone.
-2. **Motion must carry meaning.** Movement should show *what happened to the money*, not
-   decorate the screen. If an animation could be swapped for a different one without changing
-   what the user understands, cut it.
+2. **Motion must carry meaning.** Movement should show *what the decision does to the user's
+   money*, not decorate the screen. If an animation could be swapped for a different one without
+   changing what the user understands, cut it.
 3. **The co-pilot reacts, the interface does not celebrate.** The orb is the presence; it is
    what acknowledges. No confetti, no bouncing checkmarks — this product handles someone's
    income.
@@ -75,7 +75,7 @@ The centrepiece. Replace the static receipt with a sequence, roughly 900 ms end 
 | --- | --- | --- |
 | 0 ms | **The orb appears**, small, and brightens once | the co-pilot acknowledges — reuses the signature element instead of a generic checkmark |
 | ~120 ms | **Haptic `commit`** on the orb's peak | the physical beat lands with the visual one |
-| ~200 ms | **The amount arrives** — see the open choice below | this is the fact the user cares about |
+| ~200 ms | **The amount settles** — scale + fade, carried from B | the same figure travels between screens, so the result reads as continuous rather than newly announced |
 | ~450 ms | **The summary rises** in the co-pilot's voice | the explanation follows the fact, never precedes it |
 | ~700 ms | **Undo fades in last** | present and permanent, but not competing with the result |
 
@@ -114,8 +114,10 @@ That step is the second-best motion opportunity in the app — the income visibl
 as the co-pilot describes it, which is the through-line of the whole product made visible.
 `handoff` should land on Home already calm, reusing the Home entrance choreography.
 
-The **mandate** step needs a product decision: what the co-pilot watches, and how editable it is
-(see Open questions).
+The **mandate** step is never a blank setup form. Even **proposes** sensible defaults — taxes +
+buffer, marked *recommended* — and the user edits them. Same pattern in Settings. A co-pilot that
+hands you an empty form has not understood anything about you yet, which contradicts the reflect
+step that just preceded it.
 
 ---
 
@@ -135,7 +137,8 @@ The **mandate** step needs a product decision: what the co-pilot watches, and ho
 
 Full-screen co-pilot behind the header's expand button. Build the UI against
 `services/copilot.ts` mocks first, then wire a hosted open-source model **behind a proxy** — a
-key in `extra` ships inside the bundle and is extractable.
+key in `extra` ships inside the bundle and is extractable. The proxy is key-security hygiene,
+not a regulatory requirement: Even never touches the money (`CLAUDE.md` §2).
 
 The model may only **explain and propose**. Every action still goes through a user-approved,
 reversible Decision. This constraint is the product, not a limitation of the prototype.
@@ -149,15 +152,25 @@ plainly. Worth building last, when there is enough product for the value to be s
 
 ---
 
-## Open questions
+## Decisions taken
 
-1. **How does the amount arrive in D?** A count-up reads as "money moving" but risks a
-   slot-machine feel in a calm product; a settle (scale + fade into place, carried from B) is
-   quieter and more in keeping. This is the single most visible choice in the phase.
-2. **Hold-to-approve?** A press-and-hold with a progress ring makes consent deliberate and is
-   very "human over AI". But persistent undo already removes the cost of a mistap, so the
-   friction may be theatre — the opposite of the intent. Probably skip; worth a deliberate call.
-3. **What is the mandate, concretely?** Explicit rules the user sets, or something Even proposes
-   and the user edits? Shapes both onboarding and Settings.
-4. **Does Even actually move money?** Still unanswered, and it decides whether the LLM proxy is
-   a convenience or a regulatory requirement.
+1. **The amount settles in D** — scale and fade, carried from B — rather than counting up.
+   Calmer, and it creates continuity: the same figure travels between screens instead of being
+   announced twice.
+2. **No hold-to-approve.** Persistent undo already removes the cost of a mistap, so the friction
+   would be governance theatre — the opposite of the intent.
+3. **The mandate is proposed, then edited.** Even pre-selects defaults marked *recommended*;
+   the user adjusts. Never a blank form, in onboarding or in Settings.
+4. **Even never moves money** — see `CLAUDE.md` §2. It detects, explains and proposes; the user
+   approves and moves it, or confirms a prepared instruction in their bank.
+
+## Still open
+
+- **Copy in D claims Even moved the money, and must be rewritten.** The mock summary reads
+  *"I set aside $3,100"* — but under decision 4 Even set nothing aside; the user does. Something
+  closer to *"$3,100 set aside for taxes — move it when you're ready"* is honest. This also makes
+  undo cleaner than before: nothing left Even, so reverting is genuinely free rather than a
+  compensating transaction. Lives in `services/copilot.ts` `approveDecision`.
+- Whether Even prepares a *confirmable instruction* (deep link into a bank app, a copyable
+  transfer) or simply records the commitment and leaves the mechanics to the user. This decides
+  how much Phase 2 has to show.
