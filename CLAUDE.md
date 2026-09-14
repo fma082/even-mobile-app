@@ -10,7 +10,9 @@ The app ships in **English**. The maintainer communicates in Spanish; product co
 ## 1. What Even is
 
 - **User:** freelancers / anyone with income that goes up and down. "Income that rises and
-  falls" is the through-line of the whole product.
+  falls" is the through-line of the whole product. The market is **international freelancers
+  billing in USD** — the currency is literally USD, not a placeholder for a local one, and
+  amounts read like `$12,400`. It lives in one constant in `lib/format.ts`.
 - **Objective:** it does **not** show dashboards of data — it **guides proactively**. It
   surfaces decisions, explains the why, proposes an action, and lets the user approve/adjust/
   ignore. Everything is reversible.
