@@ -3,20 +3,37 @@
 Last updated: 2026-09-14 · branch `main` · https://github.com/fma082/even-mobile-app
 
 This file records what is **not** recoverable by reading the code: why things are built the way
-they are, which traps cost time, and what has actually been verified versus merely assumed.
-For what the code does, read the code.
+they are, which traps cost time, what has actually been verified versus merely assumed, and the
+product decisions that were made in conversation and left no trace in the source.
+For what the code does, read the code. For scope and roadmap, read `CLAUDE.md`.
 
 ---
 
 ## Where the app is
 
-Home and the full decision flow (`decision/[id]` → `adjust` → `confirm`) are built. Pressable
-surfaces did not render their containers on Android; the fix is in but **not yet seen on a
-device** — open item 1. `onboarding/*`, `content/*`, `paywall`, `cashflow` and `learn` are still
-`Placeholder` stubs, present so every route can be walked. The copilot LLM is **not** wired —
-`services/copilot.ts` returns mock data behind the interface the UI depends on.
+Home and the full decision flow (`decision/[id]` → `adjust` → `confirm`) are built, and Home
+**renders correctly on an Android device** as of 2026-09-14. `onboarding/*`, `content/*`,
+`paywall`, `cashflow` and `learn` are still `Placeholder` stubs, present so every route can be
+walked. The copilot LLM is **not** wired — `services/copilot.ts` returns mock data behind the
+interface the UI depends on.
 
 The app ships in **English**. Working conversation is in Spanish; product copy is not.
+
+### Stack
+
+`expo ~57.0.22` · `react-native 0.86.3` · `react-native-reanimated 4.5.1` · `nativewind ^4.2.6`
+· `zustand ^5.0.15` · `@expo/ui ~57.0.18` · `lucide-react-native ^1.45.0` ·
+`@react-native-masked-view/masked-view 0.3.2` · `expo-dev-client ~57.0.19`
+
+### What exists
+
+| | |
+| --- | --- |
+| **Design system** | `Text` `Button` `Card` `Chip` `IconButton` `SecondaryRow` `TabBar` `Icon` `PressableScale` `PresenceOrb` `PulseDot` `GradientText` |
+| **Decision** | `DecisionCard` `EvidenceList` · routes `decision/[id]` (B), `adjust` (C), `confirm` (D) |
+| **Data** | `services/copilot.ts` (mock, in-memory) · `store/app.ts` (zustand) · `types/decision.ts` |
+| **Theme** | `tokens/even-tokens.json` → `scripts/build-tokens.ts` → `theme/tokens.generated.{ts,json}` → `theme/tokens.ts` |
+| **Stubs** | onboarding ×5 · `content/[slug]` · `paywall` · `cashflow` · `learn` · `settings` |
 
 ---
 
@@ -51,11 +68,47 @@ weight in Figma surfaces as a *named missing file* rather than as silently wrong
   by path-minus-set-name and errors on ambiguity or cycles.
 - **Spacing keys are literal dp.** `px-20` is 20dp. This is *not* Tailwind's `key × 4`
   convention — the export defines the scale that way.
-- **Tracking is read as dp, the `%` suffix is ignored.** See the open item below.
+- **Tracking is read as dp, the `%` suffix is ignored.** See open item 1.
 - Semantic colours flatten to camelCase (`bg.canvas` → `canvas`, `accent.default` → `accent`,
   `icon.on-accent` → `iconOnAccent`), then `tailwind.config.js` splits them into scoped scales so
   utilities read as `text-primary` / `border-subtle` / `bg-accent-weak` rather than stuttering
   into `text-text-primary`.
+
+---
+
+## The decision flow
+
+The `Decision` is the product's core reusable object. Its anatomy — **Signal → Why → Proposal →
+Control → Reversible** — is a product rule, not a layout preference: evidence is rendered
+*before* the ask so the user approves reasoning they have seen rather than trusting an
+instruction. See `CLAUDE.md` §2.
+
+### The adjustable model
+
+`proposal.adjustable` is `{ amount, min, max, step, basis }`. **`amount` is the value the user
+drags**, because people decide in money, not in rates. The share and the remainder are computed
+by `sharePercent()` and `remainder()` and are **never stored** — storing them would let them
+drift from the figure actually being moved.
+
+`basis` exists as a number because it has to: the payment total originally lived only as text
+inside an `evidence.label`, which made the percentage underivable.
+
+### Undo is persistent
+
+There is no undo window, and `DecisionOutcome.reversible` is a field rather than an assumption
+so that no screen invents an expiry and renders a countdown. The decision moved money;
+reversibility that depends on catching a timed banner is theatrical. Consequences:
+
+- `confirm` (D) is a **state**, not a toast. Undo is a permanent control there.
+- The store keeps **every** decision, not just pending ones, so history can offer undo.
+- A failed approve or undo leaves the previous status untouched — a revert that did not happen
+  must never look like it did.
+
+### Adjust is not committed until approved
+
+The in-progress amount lives in `store.draftAmounts[id]`, not in route params, so the sheet can
+hand the value back to screen B and **closing the sheet without confirming changes nothing
+real**. Approving clears the draft, so undo restores the proposal rather than a half-made edit.
 
 ---
 
@@ -108,10 +161,54 @@ Android renders inset shadows unreliably.
 renders only `maskElement`. The gradient wordmark therefore shows as solid text on web and as the
 real gradient on iOS/Android. Not a bug; do not "fix" it.
 
+### Money never goes through `Intl`
+
+`lib/format.ts` formats by hand. Hermes ships `Intl` inconsistently across platforms, and the
+amount is the figure the user is deciding on, so it must render identically everywhere. Currency
+lives in one constant there — `{ symbol: '$', group: ',' }`, and it is **literally USD**.
+
 ### `require.context` resolves at bundle time
 
 Adding font files needs `npx expo start -c`. A plain reload will not pick them up. Ordinary
 source edits do **not** need `-c`.
+
+---
+
+## Product decisions made in conversation
+
+These shaped the code and are invisible in it.
+
+| Decision | Why |
+| --- | --- |
+| The Adjust slider moves the **amount**, not the percentage | people decide in money; the percentage is a secondary derived label |
+| Undo is **persistent**, never a 10s snackbar | the decision moved money; real reversibility, not theatrical |
+| Currency is **literally USD**, not a local-currency placeholder | market is international freelancers billing in USD |
+| Both header buttons are **plain** — glyph only, no disc | matches the ultra-minimal direction; also proved the grey disc was the dev-client overlay |
+| Spacing classes use **literal dp keys** (`px-20`) | matches the token export rather than inventing a `×4` mapping |
+| Tracking read as **dp**, ignoring the `%` suffix | the true percentage gave −0.096dp on a 32px display: invisible |
+| Home's backdrop ends on **`surface-sunken`** | `canvas` is 1.5% off `surface`, so that gradient could never be seen |
+| `@expo/ui`'s native **Slider** over a custom gesture control | its universal layer works in Expo Go on SDK 56+, so no custom build was needed for it |
+
+---
+
+## The development build
+
+Expo Go was ruled out as the cause of the rendering bug, but the dev build stays — it is the
+recommended setup for a real app and removes a whole class of doubt.
+
+- EAS project `e228d9af-e097-4562-9c78-9420e96aed6d`, owner `byfma`
+- Bundle identifier **`com.fma082.even`** on both platforms — effectively permanent once published
+- `eas.json` `development` profile: `developmentClient`, `distribution: "internal"`, and
+  **`buildType: "apk"`** — the default `aab` cannot be sideloaded onto a device
+- The Android keystore is managed by EAS. Losing it means never shipping an update to that app
+  again; retrieve it with `npx eas-cli credentials`
+
+```sh
+npx eas-cli build --platform android --profile development   # ~10–20 min, plus queue
+npx expo start --dev-client                                  # the flag matters
+```
+
+Rebuild only for new native modules or config-plugin changes. JS and TS changes hot-reload.
 
 ---
 
@@ -126,7 +223,10 @@ source edits do **not** need `-c`.
 | ✅ Backdrop gradient reaches `#F5F5F7` | sampled pixels from the render |
 | ✅ General Sans + Fraunces load | 4 DOM refs, visually confirmed on device |
 | ✅ Expo Go ruled out as the cause | the development build reproduced it identically |
-| ⚠️ Pressable surfaces render on Android | `PressableScale` rewritten; **not yet seen on a device** |
+| ✅ Slider maths (share, remainder) | exercised across the full range in node |
+| ✅ Pressable surfaces render on Android | confirmed on a Moto g75 after the `PressableScale` rewrite |
+| ⚠️ The whole decision flow B → C → D | never walked on a device; approve/undo never exercised |
+| ⚠️ Press feedback still springs | the transform moved to the wrapper; not felt on a device |
 | ⚠️ The @expo/ui Slider in Adjust | bundles and types; a native control has never mounted here |
 | ⚠️ Wordmark gradient on native | looks blue-violet on Android; not confirmed as a gradient |
 | ⚠️ Reduced-motion behaviour | coded, never exercised |
@@ -136,39 +236,19 @@ source edits do **not** need `-c`.
 
 ## Open items
 
-1. ⚠️ **Pressable surfaces did not render their containers on Android.** *Verified broken on a
-   Moto g75 in Expo Go **and** in a development build, so Expo Go is ruled out.* The Decision
-   Card showed as bare text with no surface, border or shadow; `SecondaryRow` lost its background
-   and its `flex-row` (the chevron wrapped below the text); TabBar items lost `flex-1` so the
-   labels ran together; `Button` lost its fill.
-
-   **Cause, confirmed.** Styling an `Animated.createAnimatedComponent(Pressable)` node drops
-   **both** `className` and `style` on Android. Plain Views (the Chip) always rendered correctly,
-   which was the tell.
-
-   **Fix applied** (`PressableScale`): the `Animated.View` now carries the press transform and
-   nothing else, and every visible style lands on a stock `Pressable`. `cssInterop` is gone from
-   the codebase. `containerStyle` exists for pressables that must claim space in their parent's
-   layout — only the tab bar items do.
-
-   **Still unverified on a device.** When picking this up, load it and check **the chevron in
-   `SecondaryRow`: it must sit to the right of the text, on the same line.** Do not judge by its
-   background — `#F5F5F7` on a ~`#F8F8F9` backdrop is nearly invisible even when applied
-   correctly. If it renders, close this item and the ⚠️ rows in the table above.
-
-2. **Tracking units disagree with Figma.** The export writes `-0.3%`, which as a true percentage
+1. **Tracking units disagree with Figma.** The export writes `-0.3%`, which as a true percentage
    of a 32px display is −0.096dp (invisible). It is read as −0.3dp. Fix the unit in Tokens Studio
    so source and app agree, then `npm run tokens`.
-3. **`canvas` and `surface` are 1.5% apart** (`#FAFBFC` / `#FFFFFF`), so a gradient between them
+2. **`canvas` and `surface` are 1.5% apart** (`#FAFBFC` / `#FFFFFF`), so a gradient between them
    can never be seen. Home's backdrop ends on `surface-sunken` as a workaround. A dedicated
    `bg.gradient` token pair would be the real fix.
-4. **The tab bar sits ~2% lighter** than the content above it (`#FAFBFC` vs `#F5F5F7`), separated
+3. **The tab bar sits ~2% lighter** than the content above it (`#FAFBFC` vs `#F5F5F7`), separated
    by the `border-subtle` hairline. Reads as a deliberate bar; revisit if it looks wrong.
-5. **`moti` is still in `package.json` but unused.** Its tslib interop crashed Expo Router's
+4. **`moti` is still in `package.json` but unused.** Its tslib interop crashed Expo Router's
    static web render, so `PulseDot` moved to plain Reanimated. Safe to uninstall.
-6. **The repo folder is `Even-moble-app`** (typo) while the GitHub repo is `even-mobile-app`.
+5. **The repo folder is `Even-moble-app`** (typo) while the GitHub repo is `even-mobile-app`.
    Harmless; git does not care.
-7. Real LLM wiring. `services/copilot.ts` has the security notes: a key in `extra` ships inside
+6. Real LLM wiring. `services/copilot.ts` has the security notes: a key in `extra` ships inside
    the bundle and is extractable, so route through a proxy before release. The model may only
    **explain and propose** — every action goes through a user-approved, reversible Decision.
 
@@ -183,6 +263,6 @@ the exact filenames, which are derived from the type tokens.
 
 ```sh
 npm install
-npm run tokens      # only needed after editing tokens/even-tokens.json
+npm run tokens      # only after editing tokens/even-tokens.json
 npx expo start -c
 ```
