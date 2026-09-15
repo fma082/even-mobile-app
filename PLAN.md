@@ -29,18 +29,12 @@ Everything below honours reduced-motion by rendering the end state immediately.
 
 ---
 
-## Phase 0 — Close the loop on what exists
+## Phase 0 — Close the loop on what exists ✅
 
-Nothing new until the built thing is known to work. Walk B → C → D on the device and settle the
-open ⚠️ rows in `DEV_STATE.md`:
-
-- The decision flow end to end, including **Approve → Undo → the decision returns to Home as
-  pending**. That cycle is the proof that reversibility is real.
-- The `@expo/ui` Slider actually mounts.
-- Press feedback still springs after the `PressableScale` rewrite.
-
-**If the Slider fails**, fall back to discrete presets (10 / 25 / 40%) — no native module, and
-on a phone it is often more usable than fine-grained dragging.
+Done 2026-09-15 on a Moto g75. B → C → D works end to end, the `@expo/ui` Slider mounts and
+drags with the share and remainder recalculating live, and Approve → Undo returns the decision
+to Home as pending — the cycle that proves reversibility is real. The Slider fallback to
+discrete presets was not needed.
 
 ---
 

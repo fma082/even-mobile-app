@@ -1,6 +1,6 @@
 # Even — development state
 
-Last updated: 2026-09-14 · branch `main` · https://github.com/fma082/even-mobile-app
+Last updated: 2026-09-15 · branch `main` · https://github.com/fma082/even-mobile-app
 
 This file records what is **not** recoverable by reading the code: why things are built the way
 they are, which traps cost time, what has actually been verified versus merely assumed, and the
@@ -11,8 +11,9 @@ For what the code does, read the code. For scope and roadmap, read `CLAUDE.md`.
 
 ## Where the app is
 
-Home and the full decision flow (`decision/[id]` → `adjust` → `confirm`) are built, and Home
-**renders correctly on an Android device** as of 2026-09-14. `onboarding/*`, `content/*`,
+Home and the full decision flow (`decision/[id]` → `adjust` → `confirm`) are built and
+**verified end to end on an Android device** (Moto g75, 2026-09-15), including the
+Approve → Undo → back-to-pending cycle that proves reversibility is real. `onboarding/*`, `content/*`,
 `paywall`, `cashflow` and `learn` are still `Placeholder` stubs, present so every route can be
 walked. The copilot LLM is **not** wired — `services/copilot.ts` returns mock data behind the
 interface the UI depends on.
@@ -225,9 +226,8 @@ Rebuild only for new native modules or config-plugin changes. JS and TS changes 
 | ✅ Expo Go ruled out as the cause | the development build reproduced it identically |
 | ✅ Slider maths (share, remainder) | exercised across the full range in node |
 | ✅ Pressable surfaces render on Android | confirmed on a Moto g75 after the `PressableScale` rewrite |
-| ⚠️ The whole decision flow B → C → D | never walked on a device; approve/undo never exercised |
-| ⚠️ Press feedback still springs | the transform moved to the wrapper; not felt on a device |
-| ⚠️ The @expo/ui Slider in Adjust | bundles and types; a native control has never mounted here |
+| ✅ The whole decision flow B → C → D | walked on a Moto g75, including Approve → Undo → back to pending |
+| ✅ The @expo/ui Slider in Adjust | mounts and drags; share and remainder recalculate live |
 | ⚠️ Wordmark gradient on native | looks blue-violet on Android; not confirmed as a gradient |
 | ⚠️ Reduced-motion behaviour | coded, never exercised |
 | ❌ iOS device/simulator | no full Xcode on this machine — only Command Line Tools |
